@@ -14,4 +14,14 @@ class User(db.Model):
     password = db.Column(db.String(256), nullable=False)  # รหัสผ่าน (ต้องไม่เป็นค่าว่าง)
     failed_attempts = db.Column(db.Integer, default=0)  # จำนวนครั้งที่ล็อกอินผิด (ค่าเริ่มต้นเป็น 0)
 
-   '
+    # ฟังก์ชันสำหรับตั้งรหัสผ่าน (เข้ารหัส)
+    def set_password(self, password):
+        self.password = generate_password_hash(password, method='pbkdf2:sha256')
+
+    # ฟังก์ชันสำหรับตรวจสอบรหัสผ่าน
+    def check_password(self, password):
+        return check_password_hash(self.password, password)
+
+    # ฟังก์ชันสำหรับแสดงข้อมูลเมื่อพิมพ์ออบเจกต์
+    def __repr__(self):
+        return f'<User {self.username}>'
