@@ -8,3 +8,8 @@ class RegisterForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Length(max=120)])
     password = PasswordField('Password', validators=[DataRequired(), Length(min=6)])
     submit = SubmitField('ลงทะเบียน')
+
+class LoginForm(FlaskForm):
+    username = StringField('Username', validators=[DataRequired()])
+    password = PasswordField('Password', validators=[DataRequired()])
+    submit = SubmitField('เข้าสู่ระบบ')
