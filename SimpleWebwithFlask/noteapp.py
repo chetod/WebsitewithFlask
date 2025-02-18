@@ -13,11 +13,19 @@ app.config['UPLOAD_FOLDER'] = 'static/uploads'
 app.permanent_session_lifetime = timedelta(days=7)
 
 db.init_app(app)
+# Login required decorator
+def login_required(f):
+    def wrapper(*args, **kwargs):
+        if 'user_id' not in session:
+            flash('Please login first', 'danger')
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    wrapper.__name__ = f.__name__
+    return wrapper
 
 @app.route('/')
 def index():
     return render_template('index.html')
-
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
