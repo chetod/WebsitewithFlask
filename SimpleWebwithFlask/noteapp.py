@@ -2,12 +2,15 @@ from flask import Flask, render_template, redirect, url_for, flash,request,sessi
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 import os
+from datetime import timedelta
 from forms import RegisterForm,LoginForm
 from models import db, User
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'supersecretkey'
+app.config['SECRET_KEY'] = os.urandom(24)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///soundshare.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
+app.permanent_session_lifetime = timedelta(days=7)
 
 db.init_app(app)
 
@@ -36,6 +39,7 @@ def register():
             
         flash('ลงทะเบียนสำเร็จ กรุณาเข้าสู่ระบบ', 'success')
         return redirect(url_for('login'))
+    
     return render_template('register.html', form=form)
 
 @app.route('/login',methods=['GET', 'POST'])
@@ -47,18 +51,22 @@ def login():
         user = User.query.filter_by(username=username).first()
         
         if user and check_password_hash(user.password, password):
-            user.failed_attempts = 0
-            db.session.commit()
-            
             session.permanent = True
             session['user_id'] = user.id
             flash('เข้าสู่ระบบสำเร็จ', 'success')
             return redirect(url_for('index'))
         else:
             flash('Username หรือ Password ไม่ถูกต้อง', 'danger')
-        return redirect(url_for('index'))
+        
+        
 
     return render_template('login.html', form=form)
+
+@app.route('/logout')
+def logout():
+    session.pop('user_id', None)
+    flash('ออกจากระบบสำเร็จ', 'success')
+    return redirect(url_for('login'))
 
 if __name__ == '__main__':
     with app.app_context():
