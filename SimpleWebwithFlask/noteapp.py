@@ -4,15 +4,20 @@ from werkzeug.utils import secure_filename
 import os
 from datetime import timedelta
 from forms import RegisterForm,LoginForm,SoundPostForm
-from models import db, User
+from models import db, User,Category,SoundPost,Comment,Rating
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(24)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///soundshare.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max-limit
 app.permanent_session_lifetime = timedelta(days=7)
 
 db.init_app(app)
+
+# สร้างโฟลเดอร์สำหรับเก็บไฟล์เสียง
+if not os.path.exists(app.config['UPLOAD_FOLDER']):
+    os.makedirs(app.config['UPLOAD_FOLDER'])
 
 # Login required decorator
 def login_required(f):
@@ -84,6 +89,15 @@ def dashboard():
 @login_required
 def new_post():
     form = SoundPostForm()
+    categories = Category.query.all()
+    if not categories:
+        default_categories = ["Music", "Podcast", "Nature Sounds", "Instrumental", "ASMR"]
+        for name in default_categories:
+            db.session.add(Category(name=name))
+        db.session.commit()
+        categories = Category.query.all()  # โหลดใหม่หลังเพิ่ม
+
+    form.category.choices = [(c.id, c.name) for c in categories]
     return render_template('create_post.html', form=form)
 
      
