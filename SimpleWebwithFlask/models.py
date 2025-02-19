@@ -25,6 +25,14 @@ class SoundPost(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
+    comments = db.relationship('Comment', backref='post', lazy=True)
+    ratings = db.relationship('Rating', backref='post', lazy=True)
+
+    @property
+    def average_rating(self):
+        if not self.ratings:
+            return 0
+        return sum(r.value for r in self.ratings) / len(self.ratings)
 
 class Comment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
