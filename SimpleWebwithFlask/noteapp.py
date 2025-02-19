@@ -3,7 +3,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 import os
 from datetime import timedelta
-from forms import RegisterForm,LoginForm
+from forms import RegisterForm,LoginForm,SoundPostForm
 from models import db, User
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(24)
@@ -13,6 +13,7 @@ app.config['UPLOAD_FOLDER'] = 'static/uploads'
 app.permanent_session_lifetime = timedelta(days=7)
 
 db.init_app(app)
+
 # Login required decorator
 def login_required(f):
     def wrapper(*args, **kwargs):
@@ -57,7 +58,6 @@ def login():
         username = form.username.data
         password = form.password.data
         user = User.query.filter_by(username=username).first()
-        
         if user and check_password_hash(user.password, password):
             session.permanent = True
             session['user_id'] = user.id
@@ -65,9 +65,7 @@ def login():
             return redirect(url_for('index'))
         else:
             flash('Username หรือ Password ไม่ถูกต้อง', 'danger')
-        
-        
-
+    
     return render_template('login.html', form=form)
 
 @app.route('/logout')
@@ -76,6 +74,19 @@ def logout():
     flash('ออกจากระบบสำเร็จ', 'success')
     return redirect(url_for('login'))
 
+@app.route('/dashboard')
+@login_required
+def dashboard():
+    user = User.query.get(session['user_id'])
+    return render_template('dashboard.html', username=user.username)    
+
+@app.route('/post/new', methods=['GET', 'POST'])
+@login_required
+def new_post():
+    form = SoundPostForm()
+    return render_template('create_post.html', form=form)
+
+     
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
