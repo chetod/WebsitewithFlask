@@ -31,7 +31,18 @@ def login_required(f):
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    # แสดงเสียงยอดนิยม
+    top_played = SoundPost.query.order_by(SoundPost.play_count.desc()).limit(5).all()
+    # แสดงเสียงที่มีคะแนนสูงสุด
+    top_rated = SoundPost.query.all()
+    top_rated = sorted(top_rated, key=lambda x: x.average_rating, reverse=True)[:5]
+    # แสดงเสียงล่าสุด
+    latest = SoundPost.query.order_by(SoundPost.created_at.desc()).limit(5).all()
+    
+    return render_template('index.html', 
+                         top_played=top_played,
+                         top_rated=top_rated,
+                         latest=latest)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -95,10 +106,29 @@ def new_post():
         for name in default_categories:
             db.session.add(Category(name=name))
         db.session.commit()
-        categories = Category.query.all()  # โหลดใหม่หลังเพิ่ม
-
+        categories = Category.query.all()  # reload categories after adding default ones
     form.category.choices = [(c.id, c.name) for c in categories]
+    if form.validate_on_submit():#check when press button summit
+        file = form.sound_file.data
+        filename = secure_filename(file.filename)
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename) # create path to save file
+        file.save(file_path)
+        
+        post = SoundPost( # create new post
+            title=form.title.data,
+            description=form.description.data,
+            file_path=filename,
+            user_id=session['user_id'],
+            category_id=form.category.data
+        )
+        db.session.add(post) # add post to database
+        db.session.commit() # commit changes
+        
+        flash('Your sound has been posted!', 'success')
+        return redirect(url_for('post', post_id=post.id))
+    
     return render_template('create_post.html', form=form)
+
 
      
 if __name__ == '__main__':
