@@ -25,3 +25,9 @@ class SoundPostForm(FlaskForm):
 class CommentForm(FlaskForm):
     content = TextAreaField('Comment', validators=[DataRequired()])
 
+class RatingForm(FlaskForm):
+    value = IntegerField('Rating', validators=[
+        DataRequired(),
+        NumberRange(min=1, max=5)
+    ])
+
