@@ -1,5 +1,72 @@
-{% extends 'base.html' %}
-{% block title %}Home{% endblock %}
+{% extends "base.html" %}
+
+{% block title %}Home - The Sound Share{% endblock %}
+
 {% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+
+<div class="container">
+    <h1 class="text-center main-title">Welcome to The Sound Share</h1>
     
+    <!-- Navigation Buttons -->
+    <div class="text-center mb-4">
+        <a href="{{ url_for('login') }}" class="btn btn-custom mx-2">Top Rated</a>
+        <a href="{{ url_for('login') }}" class="btn btn-custom mx-2">Most Played</a>
+        <a href="{{ url_for('login') }}" class="btn btn-custom mx-2">Latest Sounds</a>
+    </div>
+    
+    <!-- Top Played Sounds -->
+    <section class="section-container">
+        <h2 class="section-title">Top Played Sounds</h2>
+        <div class="row">
+            {% for sound in top_played %}
+            <div class="col-md-4">
+                <div class="card custom-card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ sound.title }}</h5>
+                        <p class="card-text">Plays: {{ sound.play_count }}</p>
+                        <a href="{{ url_for('post', post_id=sound.id) }}" class="btn btn-custom">Listen</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Top Rated Sounds -->
+    <section class="section-container">
+        <h2 class="section-title">Top Rated Sounds</h2>
+        <div class="row">
+            {% for sound in top_rated %}
+            <div class="col-md-4">
+                <div class="card custom-card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ sound.title }}</h5>
+                        <p class="card-text">Rating: {{ sound.average_rating|round(1) }}</p>
+                        <a href="{{ url_for('post', post_id=sound.id) }}" class="btn btn-custom">Listen</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Latest Sounds -->
+    <section class="section-container">
+        <h2 class="section-title">Latest Sounds</h2>
+        <div class="row">
+            {% for sound in latest %}
+            <div class="col-md-4">
+                <div class="card custom-card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ sound.title }}</h5>
+                        <p class="card-text">Uploaded on: {{ sound.created_at.strftime('%Y-%m-%d') }}</p>
+                        <a href="{{ url_for('post', post_id=sound.id) }}" class="btn btn-custom">Listen</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+</div>
 {% endblock %}

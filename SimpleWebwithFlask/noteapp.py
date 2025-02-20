@@ -134,8 +134,18 @@ def post(post_id):
     post = SoundPost.query.get_or_404(post_id)
     comment_form = CommentForm()
     rating_form = RatingForm()
-    if request.method == 'POST' and 'user_id' in session: # check if user is logged in
-        pass
+    if request.method == 'POST' and 'user_id' in session: # check if user is logged in and there is a POST request
+        # Check if this is a comment submission
+        if comment_form.validate_on_submit():
+            comment = Comment(
+                content=comment_form.content.data,
+                user_id=session['user_id'],
+                post_id=post_id
+            )
+            db.session.add(comment)
+            db.session.commit()
+            flash('Comment added!', 'success')
+            return redirect(url_for('post', post_id=post_id))
 
 
     return render_template('post.html', 
