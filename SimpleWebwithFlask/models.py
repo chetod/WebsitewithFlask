@@ -5,11 +5,15 @@ db = SQLAlchemy()
 
 # กำหนดโมเดล User
 class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)  # คอลัมน์ ID (Primary Key)
-    username = db.Column(db.String(80), unique=True, nullable=False)  # ชื่อผู้ใช้ (ต้องไม่ซ้ำและไม่เป็นค่าว่าง)
-    email = db.Column(db.String(120), unique=True, nullable=False)  # อีเมล (ต้องไม่ซ้ำและไม่เป็นค่าว่าง)
-    password = db.Column(db.String(256), nullable=False)  # รหัสผ่าน (ต้องไม่เป็นค่าว่าง)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)  # วันที่สร้าง (ค่าเริ่มต้นคือวันที่ปัจจุบัน)
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password = db.Column(db.String(200), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    posts = db.relationship('SoundPost', backref='author', lazy=True)
+    comments = db.relationship('Comment', backref='author', lazy=True)
+    ratings = db.relationship('Rating', backref='user', lazy=True)
+
 
 class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
