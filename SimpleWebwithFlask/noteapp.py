@@ -3,7 +3,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 import os
 from datetime import timedelta
-from forms import RegisterForm,LoginForm,SoundPostForm
+from forms import RegisterForm,LoginForm,SoundPostForm,CommentForm,RatingForm
 from models import db, User,Category,SoundPost,Comment,Rating
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(24)
@@ -131,8 +131,17 @@ def new_post():
 
 @app.route('/post/<int:post_id>')
 def post(post_id):
-    post = SoundPost.query.get(post_id)
-    return render_template('post.html', post=post)
+    post = SoundPost.query.get_or_404(post_id)
+    comment_form = CommentForm()
+    rating_form = RatingForm()
+    if request.method == 'POST' and 'user_id' in session: # check if user is logged in
+        pass
+
+
+    return render_template('post.html', 
+                         post=post,
+                         comment_form=comment_form,
+                         rating_form=rating_form)
 
      
 if __name__ == '__main__':
