@@ -129,6 +129,10 @@ def new_post():
     
     return render_template('create_post.html', form=form)
 
+@app.route('/post/<int:post_id>')
+def post(post_id):
+    post = SoundPost.query.get(post_id)
+    return render_template('post.html', post=post)
 
      
 if __name__ == '__main__':

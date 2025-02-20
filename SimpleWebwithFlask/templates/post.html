@@ -1,0 +1,5 @@
+{% extends 'base.html' %}
+{%block title%} {{post.username}}{%endblock%}
+{%block content%}
+{{post.username,post.title,post.description}}
+{%endblock%}
