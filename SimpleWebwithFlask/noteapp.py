@@ -146,7 +146,26 @@ def post(post_id):
             db.session.commit()
             flash('Comment added!', 'success')
             return redirect(url_for('post', post_id=post_id))
+        
+        # Check if this is a rating submission
+        if rating_form.validate_on_submit():
+            existing_rating = Rating.query.filter_by( #chheck if user already rated this post
+                user_id=session['user_id'],
+                post_id=post_id
+            ).first()
 
+            if existing_rating: 
+                existing_rating.value = rating_form.value.data
+            else:
+                rating = Rating(
+                    value=rating_form.value.data,
+                    user_id=session['user_id'],
+                    post_id=post_id
+                )
+                db.session.add(rating)
+            db.session.commit()
+            flash('Rating added!', 'success')
+            return redirect(url_for('post', post_id=post_id))
 
     return render_template('post.html', 
                          post=post,
