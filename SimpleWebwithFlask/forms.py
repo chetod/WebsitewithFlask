@@ -22,3 +22,6 @@ class SoundPostForm(FlaskForm):
         FileRequired(),
         FileAllowed(['mp3', 'wav'], 'Audio files only!')
     ])
+class CommentForm(FlaskForm):
+    content = TextAreaField('Comment', validators=[DataRequired()])
+
