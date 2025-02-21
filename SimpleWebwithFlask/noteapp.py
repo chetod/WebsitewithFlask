@@ -183,6 +183,12 @@ def play(post_id):
         db.session.rollback()
         return {'success': False, 'error': str(e)}, 500
     
+@app.route('/profile')
+@login_required
+def profile():
+    user = User.query.get(session['user_id'])
+    posts = SoundPost.query.filter_by(user_id=user.id).all()
+    return render_template('profile.html', user=user, posts=posts)
 
      
 if __name__ == '__main__':
