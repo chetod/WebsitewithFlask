@@ -1,8 +1,8 @@
-from flask import Flask, render_template, redirect, url_for, flash,request,session
+from flask import Flask, render_template, redirect, url_for, flash,request,session,send_from_directory
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 import os
-from datetime import timedelta
+from datetime import timedelta,datetime
 from forms import RegisterForm,LoginForm,SoundPostForm,CommentForm,RatingForm
 from models import db, User,Category,SoundPost,Comment,Rating
 app = Flask(__name__)
@@ -129,7 +129,7 @@ def new_post():
     
     return render_template('create_post.html', form=form)
 
-@app.route('/post/<int:post_id>')
+@app.route('/post/<int:post_id>', methods=['GET', 'POST'])
 def post(post_id):
     post = SoundPost.query.get_or_404(post_id)
     comment_form = CommentForm()
@@ -171,6 +171,18 @@ def post(post_id):
                          post=post,
                          comment_form=comment_form,
                          rating_form=rating_form)
+
+@app.route('/play/<int:post_id>', methods=['POST'])  # เปลี่ยนเป็น POST method
+def play(post_id):
+    try:
+        post = SoundPost.query.get_or_404(post_id)
+        post.play_count += 1
+        db.session.commit()
+        return {'success': True, 'play_count': post.play_count}, 200
+    except Exception as e:
+        db.session.rollback()
+        return {'success': False, 'error': str(e)}, 500
+    
 
      
 if __name__ == '__main__':
