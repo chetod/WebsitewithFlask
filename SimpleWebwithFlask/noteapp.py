@@ -172,16 +172,12 @@ def post(post_id):
                          comment_form=comment_form,
                          rating_form=rating_form)
 
-@app.route('/play/<int:post_id>', methods=['POST'])  # เปลี่ยนเป็น POST method
+@app.route('/play/<int:post_id>')
 def play(post_id):
-    try:
-        post = SoundPost.query.get_or_404(post_id)
-        post.play_count += 1
-        db.session.commit()
-        return {'success': True, 'play_count': post.play_count}, 200
-    except Exception as e:
-        db.session.rollback()
-        return {'success': False, 'error': str(e)}, 500
+    post = SoundPost.query.get_or_404(post_id)
+    post.play_count += 1
+    db.session.commit()
+    return '', 204
     
 @app.route('/profile')
 @login_required
@@ -190,7 +186,8 @@ def profile():
     posts = SoundPost.query.filter_by(user_id=user.id).all()
     return render_template('profile.html', user=user, posts=posts)
 
-     
+
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
