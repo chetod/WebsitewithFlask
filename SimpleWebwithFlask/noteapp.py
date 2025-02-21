@@ -187,6 +187,24 @@ def profile():
     return render_template('profile.html', user=user, posts=posts)
 
 
+@app.route('/post/edit/<int:post_id>', methods=['GET', 'POST'])
+@login_required
+def edit_post(post_id):
+    post = SoundPost.query.get_or_404(post_id)
+    if post.user_id != session['user_id']:
+        flash('Unauthorized action', 'danger')
+        return redirect(url_for('profile'))
+    
+    form = SoundPostForm(obj=post)
+    if form.validate_on_submit():
+        post.title = form.title.data
+        post.description = form.description.data
+        db.session.commit()
+        flash('Post updated successfully', 'success')
+        return redirect(url_for('profile'))
+    
+    return render_template('edit_post.html', form=form, post=post)
+
 
 if __name__ == '__main__':
     with app.app_context():
