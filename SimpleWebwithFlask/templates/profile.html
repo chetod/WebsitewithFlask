@@ -19,4 +19,44 @@
             </div>
         </div>
         
+        <div class="col-md-8">
+            <h3>โพสต์ทั้งหมด</h3>
+            {% if posts %}
+                {% for post in posts %}
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0">
+                                <a href="{{ url_for('post', post_id=post.id) }}" class="text-decoration-none">
+                                    {{ post.title }}
+                                </a>
+                            </h5>
+                            {% if session.get('user_id') == user.id %}
+                            <a href="{{ url_for('delete_post', post_id=post.id) }}" 
+                               class="btn btn-danger btn-sm">
+                                <i class="fas fa-trash"></i> ลบ
+                            </a>
+                            {% endif %}
+                        </div>
+                        <p class="text-muted small mb-2">
+                            <i class="fas fa-folder"></i> {{ post.category.name }} | 
+                            <i class="fas fa-calendar"></i> {{ post.created_at.strftime('%Y-%m-%d') }}
+                        </p>
+                        <div class="d-flex justify-content-between">
+                            <span><i class="fas fa-play"></i> {{ post.play_count }} ครั้ง</span>
+                            <span><i class="fas fa-star"></i> {{ "%.1f"|format(post.average_rating) }}/5 
+                                ({{ post.ratings|length }} คะแนน)</span>
+                            <span><i class="fas fa-comment"></i> {{ post.comments|length }} ความคิดเห็น</span>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+            <div class="alert alert-info">
+                ยังไม่มีโพสต์
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
 {% endblock %}
