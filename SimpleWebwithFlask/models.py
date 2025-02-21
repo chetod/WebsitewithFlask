@@ -14,6 +14,13 @@ class User(db.Model):
     comments = db.relationship('Comment', backref='author', lazy=True)
     ratings = db.relationship('Rating', backref='user', lazy=True)
 
+    def get_total_plays(self):
+        return sum(post.play_count for post in self.posts)
+    
+    def get_average_rating(self):
+        total_ratings = sum(post.average_rating for post in self.posts if post.average_rating)
+        count = sum(1 for post in self.posts if post.average_rating)
+        return total_ratings / count if count > 0 else 0
 
 class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
