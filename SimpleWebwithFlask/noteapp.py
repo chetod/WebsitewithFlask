@@ -206,6 +206,21 @@ def edit_post(post_id):
     return render_template('edit_post.html', form=form, post=post)
 
 
+@app.route('/post/delete/<int:post_id>', methods=['POST'])
+@login_required
+def delete_post(post_id):
+    post = SoundPost.query.get_or_404(post_id)
+    if post.user_id != session['user_id']:
+        flash('Unauthorized action', 'danger')
+        return redirect(url_for('profile'))
+    
+    db.session.delete(post)
+    db.session.commit()
+    flash('Post deleted successfully', 'success')
+    return redirect(url_for('profile'))
+
+
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
