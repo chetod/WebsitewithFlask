@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Top Played Sounds{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Top Played Sounds</h1>
+<div class="row">
+    {% for sound in top_played_sounds %}
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title"><a href="{{ url_for('post', post_id=sound.id) }}">{{ sound.title }}</a></h5>
+                <p class="card-text">{{ sound.description }}</p>
+            </div>
+            <div class="card-footer d-flex justify-content-between align-items-center">
+                <span class="badge bg-primary">{{ sound.play_count }} plays</span>
+                <a href="{{ url_for('play', post_id=sound.id) }}" class="btn btn-primary">Play</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
