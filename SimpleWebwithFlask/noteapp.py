@@ -67,6 +67,11 @@ def register():
     
     return render_template('register.html', form=form)
 
+@app.route('/top-played')
+def top_played():
+    top_played_sounds = SoundPost.query.order_by(SoundPost.play_count.desc()).all()
+    return render_template('top_played.html', top_played_sounds=top_played_sounds)
+
 @app.route('/login',methods=['GET', 'POST'])
 def login():
     form = LoginForm()
@@ -187,6 +192,21 @@ def profile():
     return render_template('profile.html', user=user, posts=posts)
 
 
+
+@app.route('/post/delete/<int:post_id>', methods=['GET'])
+@login_required
+def delete_post(post_id):
+    post = SoundPost.query.get_or_404(post_id)
+    if post.user_id != session['user_id']:
+        flash('Unauthorized action', 'danger')
+        return redirect(url_for('profile'))
+    
+    db.session.delete(post)
+    db.session.commit()
+    flash('Post deleted successfully', 'success')
+    return redirect(url_for('profile'))
+
+
 @app.route('/post/edit/<int:post_id>', methods=['GET', 'POST'])
 @login_required
 def edit_post(post_id):
@@ -204,20 +224,6 @@ def edit_post(post_id):
         return redirect(url_for('profile'))
     
     return render_template('edit_post.html', form=form, post=post)
-
-
-@app.route('/post/delete/<int:post_id>', methods=['POST'])
-@login_required
-def delete_post(post_id):
-    post = SoundPost.query.get_or_404(post_id)
-    if post.user_id != session['user_id']:
-        flash('Unauthorized action', 'danger')
-        return redirect(url_for('profile'))
-    
-    db.session.delete(post)
-    db.session.commit()
-    flash('Post deleted successfully', 'success')
-    return redirect(url_for('profile'))
 
 
 
