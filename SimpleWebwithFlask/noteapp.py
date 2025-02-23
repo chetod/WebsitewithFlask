@@ -3,8 +3,9 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 import os
 from datetime import timedelta,datetime
-from forms import RegisterForm,LoginForm,SoundPostForm,CommentForm,RatingForm
+from forms import RegisterForm,LoginForm,SoundPostForm,CommentForm,RatingForm,ProfileForm
 from models import db, User,Category,SoundPost,Comment,Rating
+from flask_migrate import Migrate
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(24)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///soundshare.db'
@@ -12,7 +13,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max-limit
 app.permanent_session_lifetime = timedelta(days=7)
-
+migrate = Migrate(app, db)
 db.init_app(app)
 
 # สร้างโฟลเดอร์สำหรับเก็บไฟล์เสียง
@@ -69,8 +70,17 @@ def register():
 
 @app.route('/top-played')
 def top_played():
-    top_played_sounds = SoundPost.query.order_by(SoundPost.play_count.desc()).all()
-    return render_template('top_played.html', top_played_sounds=top_played_sounds)
+    return render_template('top_played.html')
+    
+
+@app.route('/mostplayed')
+def most_played():
+    most_played_sounds = SoundPost.query.order_by(SoundPost.play_count.desc()).all()
+    return render_template('most_played.html', top_played_sounds=most_played_sounds)
+
+@app.route('/latestupload')
+def latest_uploads():
+    return render_template('latest_uploads.html')
 
 @app.route('/login',methods=['GET', 'POST'])
 def login():
@@ -94,13 +104,7 @@ def logout():
     session.pop('user_id', None)
     flash('ออกจากระบบสำเร็จ', 'success')
     return redirect(url_for('login'))
-
-@app.route('/dashboard')
-@login_required
-def dashboard():
-    user = User.query.get(session['user_id'])
-    return render_template('dashboard.html', username=user.username)    
-
+ 
 @app.route('/post/new', methods=['GET', 'POST'])
 @login_required
 def new_post():
@@ -191,6 +195,22 @@ def profile():
     posts = SoundPost.query.filter_by(user_id=user.id).all()
     return render_template('profile.html', user=user, posts=posts)
 
+@app.route('/profile/edit', methods=['GET', 'POST'])
+@login_required
+def edit_profile():
+    user = User.query.get(session['user_id'])
+    form = ProfileForm(obj=user)
+    if form.validate_on_submit():
+        if form.profile_image.data:
+            image_file = secure_filename(form.profile_image.data.filename)
+            form.profile_image.data.save(os.path.join(app.config['UPLOAD_FOLDER'], image_file))
+            user.profile_image = image_file
+        user.about = form.about.data
+        db.session.commit()
+        flash('Profile updated successfully', 'success')
+        return redirect(url_for('profile'))
+    return render_template('edit_profile.html', form=form)
+
 
 
 @app.route('/post/delete/<int:post_id>', methods=['GET'])
@@ -224,6 +244,8 @@ def edit_post(post_id):
         return redirect(url_for('profile'))
     
     return render_template('edit_post.html', form=form, post=post)
+
+
 
 
 
