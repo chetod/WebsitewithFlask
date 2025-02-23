@@ -221,7 +221,7 @@ def increment_play_count(post_id):
     db.session.commit()
     return jsonify(success=True, play_count=post.play_count)
 
-@app.route('/post/delete/<int:post_id>', methods=['GET'])
+@app.route('/post/delete/<int:post_id>', methods=['GET','POST'])
 @login_required
 def delete_post(post_id):
     post = SoundPost.query.get_or_404(post_id)
