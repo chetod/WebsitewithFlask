@@ -38,13 +38,13 @@ class SoundPost(db.Model):
     file_path = db.Column(db.String(200), nullable=False)
     play_count = db.Column(db.Integer, default=0)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)# สร้างความสัมพันธ์กับผู้ใช้
-    category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False) # สร้างความสัมพันธ์กับหมวดหมู่
-    comments = db.relationship('Comment', backref='post', lazy=True)# สร้างความสัมพันธ์กับคอมเม้นต์
-    ratings = db.relationship('Rating', backref='post', lazy=True)# สร้างความสัมพันธ์กับการให้คะแนน
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)  # สร้างความสัมพันธ์กับผู้ใช้
+    category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)  # สร้างความสัมพันธ์กับหมวดหมู่
+    comments = db.relationship('Comment', backref='post', lazy=True, cascade="all, delete-orphan")  # สร้างความสัมพันธ์กับคอมเม้นต์
+    ratings = db.relationship('Rating', backref='post', lazy=True, cascade="all, delete-orphan")  # สร้างความสัมพันธ์กับการให้คะแนน
 
-    @property# สร้างเมทอดเพื่อคำนวณค่าเฉลี่ยของการให้คะแนน
-    def average_rating(self):# คำนวณค่าเฉลี่ยของการให้คะแนน
+    @property  # สร้างเมทอดเพื่อคำนวณค่าเฉลี่ยของการให้คะแนน
+    def average_rating(self):  # คำนวณค่าเฉลี่ยของการให้คะแนน
         if not self.ratings:
             return 0
         return sum(r.value for r in self.ratings) / len(self.ratings)
