@@ -1,11 +1,10 @@
 {% extends "base.html" %}
-
 {% block title %}Edit Post{% endblock %}
 
 {% block content %}
 <div class="container py-4">
     <h1>Edit Post</h1>
-    <form method="POST">
+    <form method="POST" enctype="multipart/form-data">
         {{ form.hidden_tag() }}
         <div class="mb-3">
             {{ form.title.label(class="form-label") }}
@@ -14,6 +13,14 @@
         <div class="mb-3">
             {{ form.description.label(class="form-label") }}
             {{ form.description(class="form-control") }}
+        </div>
+        <div class="mb-3">
+            {{ form.category.label(class="form-label") }}
+            {{ form.category(class="form-control") }}
+        </div>
+        <div class="mb-3">
+            {{ form.sound_file.label(class="form-label") }}
+            {{ form.sound_file(class="form-control") }}
         </div>
         <button type="submit" class="btn btn-primary">Save Changes</button>
     </form>
