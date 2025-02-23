@@ -19,14 +19,20 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('index') }}">Home</a>
                     </li>
+                    
                     {% if session.get('user_id') %}
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('new_post') }}">Upload Sound</a>
                     </li>
+                    
+                    
                     {% endif %}
                 </ul>
                 <ul class="navbar-nav">
                     {% if session.get('user_id') %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('profile') }}">My Profile</a>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
                     </li>

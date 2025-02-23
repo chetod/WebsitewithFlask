@@ -1,29 +1,132 @@
-{% extends 'base.html' %}
-{%block title%} {{post.username}}{%endblock%}
-{%block content%}
-<div class="card mb-4">
-    <div class="card-body">
-        <h2 class="card-title">{{ post.title }}</h2>
-        <p class="text-muted">
-            Posted by {{ post.author.username }} in {{ post.category.name }}
-            on {{ post.created_at.strftime('%Y-%m-%d %H:%M') }}
-        </p>
-        <p class="card-text">{{ post.description }}</p>
-        
-        <audio id="audio-player" class="w-100 mb-3" controls>
-            <source src="{{ url_for('static', filename='uploads/' + post.file_path) }}" type="audio/mpeg">
-            Your browser does not support the audio element.
-        </audio>
-        
-        <div class="d-flex justify-content-between align-items-center">
-            <div>
-                <i class="fas fa-play"></i> {{ post.play_count }} plays
+{% extends "base.html" %}
+{% block title %}{{ post.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="d-flex align-items-center mb-3">
+                {% if post.author.profile_image %}
+                <img src="{{ url_for('static', filename='uploads/' + post.author.profile_image) }}" alt="{{ post.author.username }}" class="img-fluid rounded-circle me-3" style="width: 50px; height: 50px;">
+                {% else %}
+                <img src="{{ url_for('static', filename='uploads/default_profile.png') }}" alt="{{ post.author.username }}" class="img-fluid rounded-circle me-3" style="width: 50px; height: 50px;">
+                {% endif %}
+                <div>
+                    <h5 class="mb-0">{{ post.author.username }}</h5>
+                    <small class="text-muted">Posted in {{ post.category.name }} on {{ post.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                </div>
             </div>
-            <div>
-                <i class="fas fa-star"></i> {{ "%.1f"|format(post.average_rating) }}/5
-                ({{ post.ratings|length }} ratings)
+            <h2 class="card-title">{{ post.title }}</h2>
+            <p class="card-text">{{ post.description }}</p>
+            
+            <audio id="audioPlayer" class="w-100 mb-3" controls>
+                <source src="{{ url_for('static', filename='uploads/' + post.file_path) }}" type="audio/mpeg">
+                Your browser does not support the audio element.
+            </audio>
+            
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <i class="fas fa-play"></i> {{ post.play_count }} plays
+                </div>
+                <div>
+                    <i class="fas fa-star"></i> {{ "%.1f"|format(post.average_rating) }}/5
+                    ({{ post.ratings|length }} ratings)
+                </div>
             </div>
         </div>
     </div>
+
+    {% if session.get('user_id') %}
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Rate this sound</h5>
+                    <form method="POST">
+                        {{ rating_form.csrf_token }}
+                        <div class="mb-3">
+                            <div class="rating">
+                                {% for i in range(5, 0, -1) %}
+                                <input type="radio" name="value" value="{{ i }}" id="star{{ i }}"
+                                       class="btn-check" autocomplete="off">
+                                <label for="star{{ i }}" class="btn btn-outline-warning">
+                                    <i class="fas fa-star"></i>
+                                </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Submit Rating</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Add a Comment</h5>
+            <form method="POST">
+                {{ comment_form.csrf_token }}
+                <div class="mb-3">
+                    {{ comment_form.content(class="form-control", rows=3, placeholder="Write your comment here...") }}
+                </div>
+                <button type="submit" class="btn btn-primary">Post Comment</button>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Comments ({{ post.comments|length }})</h5>
+            {% for comment in post.comments|sort(attribute='created_at', reverse=true) %}
+            <div class="mb-3">
+                <div class="d-flex justify-content-between">
+                    <strong>{{ comment.author.username }}</strong>
+                    <small class="text-muted">
+                        {{ comment.created_at.strftime('%Y-%m-%d %H:%M') }}
+                    </small>
+                </div>
+                <p class="mb-0">{{ comment.content }}</p>
+            </div>
+            {% if not loop.last %}<hr>{% endif %}
+            {% endfor %}
+        </div>
+    </div>
 </div>
-{%endblock%}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const audioPlayer = document.getElementById('audioPlayer');
+        let playCounted = false;
+
+        audioPlayer.addEventListener('timeupdate', function() {
+            const playedPercentage = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+            if (!playCounted && (playedPercentage >= 30 || playedPercentage >= 50)) {
+                playCounted = true;
+                incrementPlayCount();
+            }
+        });
+
+        function incrementPlayCount() {
+            fetch('{{ url_for("increment_play_count", post_id=post.id) }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('playCount').innerText = data.play_count;
+                }
+            });
+        }
+    });
+</script>
+
+{% endblock %}
+
+
+
+    

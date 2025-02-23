@@ -19,9 +19,10 @@ class SoundPostForm(FlaskForm):
     description = TextAreaField('Description')
     category = SelectField('Category', coerce=int, validators=[DataRequired()])
     sound_file = FileField('Sound File', validators=[
-        FileRequired(),
         FileAllowed(['mp3', 'wav'], 'Audio files only!')
     ])
+    submit = SubmitField('Post')
+
 class CommentForm(FlaskForm):
     content = TextAreaField('Comment', validators=[DataRequired()])
 
