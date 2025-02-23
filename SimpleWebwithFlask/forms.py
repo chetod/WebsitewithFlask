@@ -31,3 +31,9 @@ class RatingForm(FlaskForm):
         NumberRange(min=1, max=5)
     ])
 
+class ProfileForm(FlaskForm):
+    about = TextAreaField('About', validators=[Length(max=500)])
+    profile_image = FileField('Profile Image', validators=[
+        FileAllowed(['jpg', 'jpeg', 'png'], 'Images only!')
+    ])
+    submit = SubmitField('Update Profile')

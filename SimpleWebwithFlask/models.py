@@ -13,6 +13,8 @@ class User(db.Model):
     posts = db.relationship('SoundPost', backref='author', lazy=True)
     comments = db.relationship('Comment', backref='author', lazy=True)
     ratings = db.relationship('Rating', backref='user', lazy=True)
+    about = db.Column(db.Text, nullable=True)
+    profile_image = db.Column(db.String(200), nullable=True)
 
     def get_total_plays(self):
         return sum(post.play_count for post in self.posts)
