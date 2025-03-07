@@ -83,6 +83,13 @@ FLASKASSIGN/
 ---
 
 ## ⚙️ Installation Guide (วิธีติดตั้ง) และ ใช้งาน
+1.git clonne https://github.com/chetod/WebsitewithFlask.git
+
+2.cd \WebsitewithFlask\SimpleWebwithFlask
+
+3.poetry install
+
+4.poetry run python noteapp.py
 
 
 
